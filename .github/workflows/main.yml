@@ -29,18 +29,20 @@ jobs:
           pip install --upgrade pip setuptools
           pip install buildozer cython
 
-      - name: Accept Android Licenses and Install Build Tools
+      - name: Accept Android Licenses (Install Build-Tools 36)
         run: |
-          # Create Android SDK directory and download command-line tools
+          # Create an Android SDK folder
           mkdir -p $HOME/android-sdk
           cd $HOME/android-sdk
+          
+          # Download the command-line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
           
-          # Unzip into a temporary folder
+          # Unzip into a temp folder (avoid "move into itself" error)
           mkdir -p cmdline-tools-temp
           unzip cmdline-tools.zip -d cmdline-tools-temp
           
-          # Create the final folder and move files (avoid moving folder into itself)
+          # Move the unzipped cmdline-tools into "latest"
           mkdir -p cmdline-tools/latest
           mv cmdline-tools-temp/cmdline-tools/* cmdline-tools/latest
           rm -rf cmdline-tools-temp
@@ -49,11 +51,11 @@ jobs:
           export ANDROID_SDK_ROOT=$HOME/android-sdk
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
           
-          # Automatically accept all Android SDK licenses
-          yes | sdkmanager --licenses
+          # Force-install Build-Tools 36.0.0 from the canary channel (channel=3)
+          yes | sdkmanager --channel=3 --install "build-tools;36.0.0"
           
-          # Install a stable Build Tools version (33.0.0) with accepted licenses
-          sdkmanager --install "build-tools;33.0.0"
+          # Accept any pending licenses
+          yes | sdkmanager --licenses
 
       - name: Build APK
         run: buildozer -v android debug
