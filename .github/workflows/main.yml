@@ -12,15 +12,19 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # 1. Check out your code
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: "3.9"
 
+      # 3. Install Dependencies
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -28,13 +32,18 @@ jobs:
           pip install --upgrade pip setuptools
           pip install buildozer cython
 
+      # 4. Accept Android Licenses
+      - name: Accept Android Licenses
+        run: |
+          yes | sdkmanager --licenses
+
+      # 5. Build the APK with Buildozer
       - name: Build APK
         run: buildozer -v android debug
 
-      - name: Upload APK Locally
-        # Instead of actions/upload-artifact@v3,
-        # we reference our local copy
-        uses: ./.github/actions/upload-artifact
+      # 6. Upload the APK as an artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
         with:
           name: KivyToDoList-APK
           path: bin/*.apk
