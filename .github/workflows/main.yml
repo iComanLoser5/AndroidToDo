@@ -29,7 +29,7 @@ jobs:
           pip install --upgrade pip setuptools
           pip install buildozer cython
 
-      - name: Accept Licenses & Install Build-Tools 36
+      - name: Accept Licenses & Install Build-Tools 36 (Preview)
         run: |
           # 1) Create an Android SDK folder
           mkdir -p $HOME/android-sdk
@@ -51,24 +51,25 @@ jobs:
           export ANDROID_SDK_ROOT=$HOME/android-sdk
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
           
-          # 6) Update the SDK (check for new packages)
+          # 6) Update the SDK (pull the latest package info)
           yes | sdkmanager --update
           
-          # 7) Force-install Build-Tools 36.0.0 & platform 36 from the canary channel
-          #    If "platforms;android-36" doesn't exist, sdkmanager will skip it, but let's attempt it anyway
-          yes | sdkmanager --channel=3 --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          # 7) Force-install Build-Tools 36.0.0 from the canary channel
+          #    This also installs "platform-tools" so 'aidl' can be found in build-tools/36.0.0
+          yes | sdkmanager --channel=3 --install "platform-tools" "build-tools;36.0.0"
           
-          # 8) Accept leftover licenses (if any)
+          # 8) Accept leftover licenses (if any remain)
           yes | sdkmanager --licenses
+          
+          # 9) Confirm 'aidl' is installed
+          echo "Checking for aidl in build-tools/36.0.0..."
+          ls -l $HOME/android-sdk/build-tools/36.0.0/aidl || true
 
       - name: Build APK
         run: buildozer -v android debug
 
       - name: Upload APK
-        # If you vendor 'upload-artifact' locally, keep the local path:
-        # uses: ./.github/actions/local-upload-artifact
-        # Otherwise, if your org/repo allows Marketplace actions, use:
-        # uses: actions/upload-artifact@v3
+        # If you're using a local vendored copy of 'upload-artifact', keep this line:
         uses: ./.github/actions/local-upload-artifact
         with:
           name: KivyToDoList-APK
