@@ -6,9 +6,8 @@ on:
       - main
   workflow_dispatch:
 
-# Give the workflow permission to fetch Marketplace actions
 permissions:
-  contents: write
+  contents: write  # Ensure the workflow can download Marketplace actions
 
 jobs:
   build:
@@ -34,8 +33,7 @@ jobs:
         run: buildozer -v android debug
 
       - name: Upload APK
-        # Using a specific commit SHA from github.com/actions/upload-artifact
-        uses: actions/upload-artifact@394d8510f49c6d9b351db2e51fdf41810557cefc
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: KivyToDoList-APK
           path: bin/*.apk
