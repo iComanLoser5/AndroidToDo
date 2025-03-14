@@ -29,38 +29,41 @@ jobs:
           pip install --upgrade pip setuptools
           pip install buildozer cython
 
-      - name: Accept Android Licenses (Install Build-Tools 36)
+      - name: Accept Licenses & Install Build-Tools 36
         run: |
-          # Create an Android SDK folder
+          # 1. Create an Android SDK folder
           mkdir -p $HOME/android-sdk
           cd $HOME/android-sdk
           
-          # Download the command-line tools
+          # 2. Download the command-line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
           
-          # Unzip into a temp folder (avoid "move into itself" error)
+          # 3. Unzip into a temporary folder to avoid subdirectory conflicts
           mkdir -p cmdline-tools-temp
           unzip cmdline-tools.zip -d cmdline-tools-temp
           
-          # Move the unzipped cmdline-tools into "latest"
+          # 4. Move the unzipped "cmdline-tools" into "latest"
           mkdir -p cmdline-tools/latest
           mv cmdline-tools-temp/cmdline-tools/* cmdline-tools/latest
           rm -rf cmdline-tools-temp
           
-          # Set environment variables so sdkmanager is available
+          # 5. Expose sdkmanager in our PATH
           export ANDROID_SDK_ROOT=$HOME/android-sdk
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
           
-          # Force-install Build-Tools 36.0.0 from the canary channel (channel=3)
+          # 6. Install Build-Tools 36.0.0 from the canary (preview) channel (channel=3)
+          #    This forcibly installs it even though it's a preview.
           yes | sdkmanager --channel=3 --install "build-tools;36.0.0"
           
-          # Accept any pending licenses
+          # 7. Accept leftover licenses (in case anything else is needed)
           yes | sdkmanager --licenses
 
       - name: Build APK
         run: buildozer -v android debug
 
       - name: Upload APK
+        # If you're vendoring the upload-artifact action locally, keep your local path:
+        # otherwise, replace with actions/upload-artifact@v3 (if your Marketplace settings allow it)
         uses: ./.github/actions/local-upload-artifact
         with:
           name: KivyToDoList-APK
