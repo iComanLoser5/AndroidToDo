@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: "3.9"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip openjdk-17-jdk unzip wget
@@ -31,39 +31,44 @@ jobs:
 
       - name: Accept Licenses & Install Build-Tools 36
         run: |
-          # 1. Create an Android SDK folder
+          # 1) Create an Android SDK folder
           mkdir -p $HOME/android-sdk
           cd $HOME/android-sdk
           
-          # 2. Download the command-line tools
+          # 2) Download the command-line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
           
-          # 3. Unzip into a temporary folder to avoid subdirectory conflicts
+          # 3) Unzip into a temporary folder
           mkdir -p cmdline-tools-temp
           unzip cmdline-tools.zip -d cmdline-tools-temp
           
-          # 4. Move the unzipped "cmdline-tools" into "latest"
+          # 4) Move them into cmdline-tools/latest
           mkdir -p cmdline-tools/latest
           mv cmdline-tools-temp/cmdline-tools/* cmdline-tools/latest
           rm -rf cmdline-tools-temp
           
-          # 5. Expose sdkmanager in our PATH
+          # 5) Expose sdkmanager in our PATH
           export ANDROID_SDK_ROOT=$HOME/android-sdk
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
           
-          # 6. Install Build-Tools 36.0.0 from the canary (preview) channel (channel=3)
-          #    This forcibly installs it even though it's a preview.
-          yes | sdkmanager --channel=3 --install "build-tools;36.0.0"
+          # 6) Update the SDK (check for new packages)
+          yes | sdkmanager --update
           
-          # 7. Accept leftover licenses (in case anything else is needed)
+          # 7) Force-install Build-Tools 36.0.0 & platform 36 from the canary channel
+          #    If "platforms;android-36" doesn't exist, sdkmanager will skip it, but let's attempt it anyway
+          yes | sdkmanager --channel=3 --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          
+          # 8) Accept leftover licenses (if any)
           yes | sdkmanager --licenses
 
       - name: Build APK
         run: buildozer -v android debug
 
       - name: Upload APK
-        # If you're vendoring the upload-artifact action locally, keep your local path:
-        # otherwise, replace with actions/upload-artifact@v3 (if your Marketplace settings allow it)
+        # If you vendor 'upload-artifact' locally, keep the local path:
+        # uses: ./.github/actions/local-upload-artifact
+        # Otherwise, if your org/repo allows Marketplace actions, use:
+        # uses: actions/upload-artifact@v3
         uses: ./.github/actions/local-upload-artifact
         with:
           name: KivyToDoList-APK
