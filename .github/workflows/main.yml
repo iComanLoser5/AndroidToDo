@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
 
-# Give the workflow permission to download actions from GitHub Marketplace
+# Give the workflow permission to fetch Marketplace actions
 permissions:
   contents: write
 
@@ -31,11 +31,11 @@ jobs:
           pip install buildozer cython
 
       - name: Build APK
-        run: |
-          buildozer -v android debug
+        run: buildozer -v android debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        # Using a specific commit SHA from github.com/actions/upload-artifact
+        uses: actions/upload-artifact@394d8510f49c6d9b351db2e51fdf41810557cefc
         with:
           name: KivyToDoList-APK
           path: bin/*.apk
