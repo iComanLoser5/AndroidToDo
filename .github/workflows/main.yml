@@ -6,9 +6,9 @@ on:
       - main
   workflow_dispatch:
 
-# Give GitHub permission to read from the marketplace
+# Give the workflow permission to download actions from GitHub Marketplace
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -25,17 +25,17 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt update
-          sudo apt install -y python3-pip openjdk-17-jdk unzip
+          sudo apt-get update
+          sudo apt-get install -y python3-pip openjdk-17-jdk unzip
           pip install --upgrade pip setuptools
           pip install buildozer cython
 
       - name: Build APK
-        run: buildozer -v android debug
+        run: |
+          buildozer -v android debug
 
-      # Use a pinned release version of upload-artifact
       - name: Upload APK
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v3
         with:
           name: KivyToDoList-APK
           path: bin/*.apk
