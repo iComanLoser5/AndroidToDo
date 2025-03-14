@@ -25,37 +25,35 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip openjdk-17-jdk unzip
+          sudo apt-get install -y python3-pip openjdk-17-jdk unzip wget
           pip install --upgrade pip setuptools
           pip install buildozer cython
 
-      - name: Accept Android Licenses
+      - name: Accept Android Licenses and Install Build Tools
         run: |
-          # Install command-line tools
-          sudo apt-get update
-          sudo apt-get install -y wget
-          
+          # Create Android SDK directory and download command-line tools
           mkdir -p $HOME/android-sdk
           cd $HOME/android-sdk
-          
-          # Download the command-line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
           
-          # Unzip into a new folder called "cmdline-tools"
-          mkdir -p cmdline-tools
-          unzip cmdline-tools.zip -d cmdline-tools
+          # Unzip into a temporary folder
+          mkdir -p cmdline-tools-temp
+          unzip cmdline-tools.zip -d cmdline-tools-temp
           
-          # The extracted zip also contains a "cmdline-tools" folder, so we move its contents into "cmdline-tools/latest"
+          # Create the final folder and move files (avoid moving folder into itself)
           mkdir -p cmdline-tools/latest
-          mv cmdline-tools/cmdline-tools/* cmdline-tools/latest
+          mv cmdline-tools-temp/cmdline-tools/* cmdline-tools/latest
+          rm -rf cmdline-tools-temp
           
-          # Export environment variables so sdkmanager is recognized
+          # Set environment variables so sdkmanager is available
           export ANDROID_SDK_ROOT=$HOME/android-sdk
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
           
-          # Accept licenses automatically
+          # Automatically accept all Android SDK licenses
           yes | sdkmanager --licenses
-
+          
+          # Install a stable Build Tools version (33.0.0) with accepted licenses
+          sdkmanager --install "build-tools;33.0.0"
 
       - name: Build APK
         run: buildozer -v android debug
