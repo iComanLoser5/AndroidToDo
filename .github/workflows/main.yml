@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+# Give GitHub permission to read from the marketplace
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,11 +31,11 @@ jobs:
           pip install buildozer cython
 
       - name: Build APK
-        run: |
-          buildozer -v android debug
+        run: buildozer -v android debug
 
+      # Use a pinned release version of upload-artifact
       - name: Upload APK
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: KivyToDoList-APK
           path: bin/*.apk
