@@ -1,0 +1,69 @@
+<ToDoWidget>:
+    orientation: "vertical"
+    spacing: 10
+    padding: 10
+
+    # --- Input Fields in a horizontal BoxLayout ---
+    BoxLayout:
+        size_hint_y: None
+        height: "50dp"
+        spacing: 10
+        TextInput:
+            id: task_input
+            hint_text: "Enter Task"
+            multiline: False
+            font_size: 18
+            foreground_color: 1,1,1,1
+            background_color: 0,0,0,1
+        TextInput:
+            id: due_input
+            hint_text: "Due (days)"
+            multiline: False
+            font_size: 18
+            input_filter: "int"
+            foreground_color: 1,1,1,1
+            background_color: 0,0,0,1
+        TextInput:
+            id: diff_input
+            hint_text: "Difficulty (1-5)"
+            multiline: False
+            font_size: 18
+            input_filter: "int"
+            foreground_color: 1,1,1,1
+            background_color: 0,0,0,1
+
+    # --- Buttons for actions ---
+    BoxLayout:
+        size_hint_y: None
+        height: "50dp"
+        spacing: 10
+        Button:
+            text: "Add Task"
+            font_size: 18
+            background_color: 0,0,0,1
+            color: 1,1,1,1
+            on_release: root.add_task()
+        Button:
+            text: "Remove Task"
+            font_size: 18
+            background_color: 0,0,0,1
+            color: 1,1,1,1
+            on_release: root.remove_task()
+        Button:
+            text: "Sort by Priority"
+            font_size: 18
+            background_color: 0,0,0,1
+            color: 1,1,1,1
+            on_release: root.sort_tasks()
+
+    # --- RecycleView to display tasks ---
+    RecycleView:
+        id: task_rv
+        viewclass: "Label"
+        size_hint_y: 1
+        RecycleBoxLayout:
+            default_size: None, dp(30)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: "vertical"
